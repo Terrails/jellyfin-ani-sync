@@ -26,8 +26,16 @@ namespace jellyfin_ani_sync.Helpers {
             if (animeListXml == null) return (null, null);
             Dictionary<string, string> providers;
             if (video is Episode) {
+                var episode = video as Episode;
                 //Search for Anidb id at season level
-                providers = (video as Episode).Season.ProviderIds.ContainsKey("Anidb") ? (video as Episode).Season.ProviderIds : (video as Episode).Series.ProviderIds;
+                if (episode.Season.ProviderIds.ContainsKey("Anidb")) {
+                    if (int.TryParse(episode.Season.ProviderIds["Anidb"], out aniDbId)) {
+                        logger.LogInformation($"(Anidb) Anime {episode.Series.Name} already has an AniDB ID {aniDbId}; no need to look it up");
+                        return (aniDbId, null);
+                    } else return (null, null);
+                } else {
+                    providers = episode.Series.ProviderIds;
+                }
             } else if (video is Movie) {
                 providers = (video as Movie).ProviderIds;
             } else {
