@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Jellyfin.Data.Entities;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Net;
@@ -15,7 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace jellyfin_ani_sync.Helpers;
 
 public class SyncHelper {
-    public static List<BaseItem> GetUsersJellyfinLibrary(Guid userId, IUserManager userManager, ILibraryManager libraryManager) {
+    public static IReadOnlyList<BaseItem> GetUsersJellyfinLibrary(Guid userId, IUserManager userManager, ILibraryManager libraryManager) {
         var query = new InternalItemsQuery(userManager.GetUserById(userId)) {
             IncludeItemTypes = new[] {
                 BaseItemKind.Movie,
@@ -25,21 +24,6 @@ public class SyncHelper {
         };
 
         return libraryManager.GetItemList(query);
-    }
-
-    public static Dictionary<int, (int, DateTime)> FilterSeriesByUserProgress(Guid userId, Series series, IUserDataManager userDataManager) {
-        Dictionary<int, (int, DateTime)> returnDictionary = new Dictionary<int, (int, DateTime)>();
-        var seasons = series.Children.OfType<Season>().Select(baseItem => baseItem).ToList();
-        foreach (Season season in seasons) {
-            List<Episode> episodes = season.Children.OfType<Episode>().Select(baseItem => baseItem).ToList();
-            int highestEpisodeWatched = episodes.Max(item => userDataManager.GetUserData(userId, item).Played ? item.IndexNumber.Value : 0);
-            DateTime? dateTimeWatched = episodes.Max(episode => userDataManager.GetUserData(userId, episode).LastPlayedDate);
-            if (highestEpisodeWatched != 0 && dateTimeWatched != null) {
-                returnDictionary.Add(season.IndexNumber.Value, (highestEpisodeWatched, dateTimeWatched.Value));
-            }
-        }
-
-        return returnDictionary;
     }
 
     /// <summary>
