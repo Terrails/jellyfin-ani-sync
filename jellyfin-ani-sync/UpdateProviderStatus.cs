@@ -518,8 +518,7 @@ namespace jellyfin_ani_sync {
         }
 
         private async Task<bool> CheckIfRewatchCompleted(Anime detectedAnime, int indexNumber, bool? overrideCheckRewatch) {
-            if (overrideCheckRewatch == null ||
-                overrideCheckRewatch.Value ||
+            if (overrideCheckRewatch is true ||
                 detectedAnime.MyListStatus is { Status: Status.Completed } ||
                 detectedAnime.MyListStatus is { Status: Status.Rewatching } && detectedAnime.MyListStatus.NumEpisodesWatched < indexNumber) {
                 if (ApiName == ApiName.Simkl) {
