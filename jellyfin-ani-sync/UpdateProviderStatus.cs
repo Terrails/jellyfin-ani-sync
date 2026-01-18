@@ -106,7 +106,6 @@ namespace jellyfin_ani_sync {
 
                 // Search for aniDb ID in external URLs first
                 var externalUrls = BaseItem.ProviderManager.GetExternalUrls(video);
-                _logger.LogInformation($"The external URLs for {(video is Episode ? "episode" : "movie")} {video.Name} are: {string.Join(", ", externalUrls.Select(url => url.Name))}");
                 var highestEpUrlMatch = externalUrls.Select(url => new Regex(@"AniDB \(e(?<anidbEpisodeId>\d+)\) \(a(?<anidbAnimeId>\d+) > (?<episodeType>E|SP)(?<episodeNumber>\d+)\)").Match(url.Name))
                                  .Where(match => match.Success)
                                  .OrderByDescending(match => {
